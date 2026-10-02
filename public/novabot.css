@@ -1,0 +1,885 @@
+/* Fonts: Archivo (titles), Saira (messages), Source Code Pro (typing box) */
+@import url("https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,900&family=Saira:wdth,wght@100,400..700&family=Source+Code+Pro:wght@400;500&display=swap");
+
+/* =========================================
+   NOVABOT CHAT WIDGET
+   Loaded on the live site from the Worker (see the
+   Squarespace snippet in README-SQUARESPACE.md).
+   Everything is tied to the nv- IDs, so it
+   won't clash with the site's own styles.
+   ========================================= */
+
+/* Keep Squarespace's own styles from leaking into the widget */
+#nv-chat-toggle,
+#nv-chat-teaser,
+#nv-chat-teaser *,
+#nv-chat-panel,
+#nv-chat-panel * {
+  box-sizing: border-box;
+}
+#nv-chat-panel {
+  letter-spacing: normal;
+  line-height: 1.4;
+}
+
+/* ----- The bubble button (a ring, like the logo) ----- */
+#nv-chat-toggle {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 9999;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 2px solid rgba(229, 194, 224, 0.7);
+  background: linear-gradient(120deg, #9c1757 0%, #5e1b82 55%, #25194d 100%);
+  color: rgb(229, 194, 224);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    0 0 0 6px rgba(158, 92, 200, 0.18),
+    0 0 28px rgba(158, 92, 200, 0.45),
+    0 10px 30px rgba(0, 0, 0, 0.5);
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+#nv-chat-toggle:hover {
+  transform: scale(1.16);
+  filter: brightness(1.15);
+}
+#nv-chat-toggle svg {
+  width: 26px;
+  height: 26px;
+}
+/* A slow breathing glow, so the button feels alive */
+#nv-chat-toggle {
+  animation: nv-breathe 3.6s ease-in-out infinite;
+}
+@keyframes nv-breathe {
+  0%, 100% {
+    box-shadow:
+      0 0 0 6px rgba(158, 92, 200, 0.18),
+      0 0 28px rgba(158, 92, 200, 0.45),
+      0 10px 30px rgba(0, 0, 0, 0.5);
+  }
+  50% {
+    box-shadow:
+      0 0 0 8px rgba(158, 92, 200, 0.24),
+      0 0 40px rgba(176, 29, 104, 0.6),
+      0 10px 30px rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* Waveform bars inside the chat bubble icon, swaying gently */
+#nv-chat-toggle .nv-wave rect {
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scaleY(0.35);
+  animation: nv-sway 1.8s ease-in-out infinite;
+}
+#nv-chat-toggle .nv-wave rect:nth-child(2) { animation-delay: -0.3s; }
+#nv-chat-toggle .nv-wave rect:nth-child(3) { animation-delay: -0.6s; }
+#nv-chat-toggle .nv-wave rect:nth-child(4) { animation-delay: -0.9s; }
+#nv-chat-toggle .nv-wave rect:nth-child(5) { animation-delay: -1.2s; }
+@keyframes nv-sway {
+  0%, 100% { transform: scaleY(0.3); }
+  50%      { transform: scaleY(0.7); }
+}
+
+/* Music, video or NovaBot's voice playing (sound we can't follow):
+   a busier beat */
+#nv-chat-toggle.nv-playing {
+  animation-duration: 1s;
+}
+#nv-chat-toggle.nv-playing .nv-wave rect {
+  animation: nv-beat 0.6s ease-in-out infinite alternate;
+}
+#nv-chat-toggle.nv-playing .nv-wave rect:nth-child(2) { animation-duration: 0.45s; animation-delay: -0.2s; }
+#nv-chat-toggle.nv-playing .nv-wave rect:nth-child(3) { animation-duration: 0.7s; animation-delay: -0.5s; }
+#nv-chat-toggle.nv-playing .nv-wave rect:nth-child(4) { animation-duration: 0.5s; animation-delay: -0.1s; }
+#nv-chat-toggle.nv-playing .nv-wave rect:nth-child(5) { animation-duration: 0.65s; animation-delay: -0.35s; }
+@keyframes nv-beat {
+  from { transform: scaleY(0.25); }
+  to   { transform: scaleY(1); }
+}
+
+/* Following the page's actual sound (set from novabot.js) */
+#nv-chat-toggle.nv-live {
+  animation: none;
+  box-shadow:
+    0 0 0 calc(6px + var(--nv-level, 0) * 8px) rgba(158, 92, 200, 0.22),
+    0 0 calc(28px + var(--nv-level, 0) * 50px) rgba(176, 29, 104, 0.6),
+    0 10px 30px rgba(0, 0, 0, 0.5);
+}
+#nv-chat-toggle.nv-live .nv-wave rect {
+  animation: none;
+  transform: scaleY(var(--nv-bar, 0.3));
+}
+
+/* While the speech bubble is up, or a reply arrives while the chat is
+   tucked away, the button pulses a ring outwards */
+#nv-chat-toggle.nv-attention,
+#nv-chat-toggle.nv-unread {
+  animation: nv-ping 2s ease-out 0.6s infinite;
+}
+@keyframes nv-ping {
+  0% {
+    box-shadow:
+      0 0 0 6px rgba(158, 92, 200, 0.18),
+      0 0 0 6px rgba(208, 42, 125, 0.6),
+      0 0 28px rgba(158, 92, 200, 0.45),
+      0 10px 30px rgba(0, 0, 0, 0.5);
+  }
+  70%, 100% {
+    box-shadow:
+      0 0 0 6px rgba(158, 92, 200, 0.18),
+      0 0 0 22px rgba(208, 42, 125, 0),
+      0 0 28px rgba(158, 92, 200, 0.45),
+      0 10px 30px rgba(0, 0, 0, 0.5);
+  }
+}
+
+/* ----- Speech bubble over the button ("I can help with...") ----- */
+#nv-chat-teaser {
+  position: fixed;
+  right: 24px;
+  bottom: 104px;
+  z-index: 9999;
+  width: max-content;
+  max-width: min(280px, calc(100vw - 48px));
+  transform-origin: calc(100% - 32px) 100%;
+  animation:
+    nv-teaser-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+    nv-float 4s ease-in-out 0.5s infinite;
+}
+#nv-chat-teaser[hidden] {
+  display: none;
+}
+@keyframes nv-teaser-in {
+  from { opacity: 0; transform: translateY(16px) scale(0.6); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes nv-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-5px); }
+}
+.nv-teaser-open {
+  position: relative;
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 14px 40px 14px 18px;
+  border: 1px solid rgba(229, 194, 224, 0.35);
+  border-radius: 22px 22px 6px 22px;
+  background:
+    radial-gradient(ellipse at 100% 100%, rgba(74, 26, 120, 0.55) 0%, transparent 70%),
+    #150d1f;
+  box-shadow:
+    0 12px 32px rgba(0, 0, 0, 0.5),
+    0 0 26px rgba(158, 92, 200, 0.35);
+  color: rgb(229, 194, 224);
+  font-family: saira, "Futura", Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: normal;
+  text-align: left;
+  text-shadow: 0 0 6px rgb(155, 20, 222);
+  cursor: pointer;
+}
+/* The little tail pointing down at the button */
+.nv-teaser-open::after {
+  content: "";
+  position: absolute;
+  right: 26px;
+  bottom: -8px;
+  width: 14px;
+  height: 14px;
+  background: #1d1230;
+  border-right: 1px solid rgba(229, 194, 224, 0.35);
+  border-bottom: 1px solid rgba(229, 194, 224, 0.35);
+  transform: rotate(45deg);
+}
+.nv-teaser-open:hover {
+  border-color: rgba(255, 95, 168, 0.7);
+}
+.nv-teaser-name {
+  display: block;
+  margin-bottom: 2px;
+  font-family: "Archivo", "Futura", Arial, sans-serif;
+  font-stretch: 125%;
+  font-weight: 900;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #ff5fa8;
+  text-shadow: none;
+}
+.nv-teaser-close {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: rgba(229, 194, 224, 0.7);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+.nv-teaser-close:hover {
+  color: #fff;
+}
+
+/* ----- The chat window ----- */
+#nv-chat-panel {
+  display: flex;
+  position: fixed;
+  right: 24px;
+  bottom: 104px;
+  z-index: 9999;
+  width: 440px;
+  height: 720px;
+  max-width: calc(100vw - 48px);
+  max-height: calc(100vh - 130px);
+  max-height: calc(100dvh - 130px);
+  flex-direction: column;
+  text-align: center;
+  overflow: hidden;
+  border-radius: 56px 56px 74px 56px;
+  background:
+    radial-gradient(ellipse at 100% 100%, rgba(74, 26, 120, 0.55) 0%, transparent 60%),
+    #150d1f;
+
+  box-shadow: 0 20px 60px rgba(113, 4, 57, 0.6);
+  filter: drop-shadow(0px 0px 115px rgba(158, 92, 200, 0.5));
+  font-family: "Source Code Pro", "Futura", Arial, sans-serif;
+  animation:
+    nv-rise 0.2s ease-out,
+    nv-glow 18s ease-in-out 0.2s infinite,
+    nv-text-glow 6s ease-in-out infinite;
+  color: #fff;
+  /* A soft glow on all the chat's text (also the still version for reduced motion) */
+  text-shadow: 0 0 6px rgba(155, 20, 222, 0.75);
+}
+/* The text glow drifts slowly between the logo purple and pink */
+@keyframes nv-text-glow {
+  0%, 100% { text-shadow: 0 0 6px rgba(155, 20, 222, 0.75); }
+  50%      { text-shadow: 0 0 9px rgba(208, 42, 125, 0.7), 0 0 2px rgba(255, 95, 168, 0.45); }
+}
+#nv-chat-panel.nv-closed,
+#nv-chat-panel.nv-waiting {
+  display: none;
+}
+/* Slightly see-through so the page shows behind it, until the mouse is
+   over it or someone is typing in it */
+#nv-chat-panel {
+  opacity: 0.85;
+}
+#nv-chat-panel:hover,
+#nv-chat-panel:focus-within {
+  opacity: 1;
+}
+/* Tucked into the chat button, out of the way of the page.
+   It shrinks towards the button's centre (32px in from the right,
+   48px below the window). */
+#nv-chat-panel {
+  transition:
+    transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 0.3s ease,
+    visibility 0s;
+}
+#nv-chat-panel.nv-tucked {
+  transform: translate(calc(50% - 32px), calc(50% + 48px)) scale(0.08);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    transform 0.35s cubic-bezier(0.4, 0, 0.6, 1),
+    opacity 0.25s ease 0.1s,
+    visibility 0s 0.35s;
+}
+@keyframes nv-rise {
+  from { opacity: 0; transform: rotateZ(180deg); translateY(200px); }
+  to   { transform: translateY(0); }
+}
+/* Slow, uneven breathing glow that drifts between
+   the logo purple and pink */
+@keyframes nv-glow {
+  0%, 100% { filter: drop-shadow(0 0 115px rgba(158, 92, 200, 0.5)); }
+  18%      { filter: drop-shadow(-8px 4px 135px rgba(176, 29, 104, 0.5)); }
+  37%      { filter: drop-shadow(6px -7px 90px rgba(122, 31, 134, 0.5)); }
+  55%      { filter: drop-shadow(0 8px 150px rgba(208, 42, 125, 0.5)); }
+  76%      { filter: drop-shadow(7px 0 100px rgba(90, 28, 134, 0.5)); }
+}
+
+/* ----- Header with jagged peaks, like the homepage ----- */
+.nv-header {
+  position: relative;
+  padding: 18px 32px 32px;
+  display: flex;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(120deg, #9c1757 0%, #5e1b82 55%, #25194d 100%);
+  clip-path: polygon(
+    0 0, 100% 0, 100% 72%,
+    93% 100%, 85% 80%, 76% 96%, 66% 70%, 55% 100%,
+    45% 78%, 34% 94%, 24% 68%, 13% 98%, 5% 80%, 0 92%
+  );
+}
+.nv-title {
+  margin: 0;
+  font-family: "Archivo", "Arial Black", sans-serif;
+  font-stretch: 125%;
+  font-weight: 900;
+  font-size: clamp(18px, 5vw, 24px);
+  text-transform: uppercase;
+  text-align: center;
+  line-height: 1;
+}
+.nv-subtitle {
+  margin: 6px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-family: saira;
+  color: rgba(255, 255, 255, 0.8);
+}
+#nv-chat-close {
+  background: none;
+  border: 0;
+  color: #fff;
+  font-size: 48px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 16px 4px;
+  transform: translateX(30px);
+}
+
+/* ----- Message area ----- */
+#nv-chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  
+  gap: 10px;
+}
+
+/* ----- Scrollbar (message area) -----
+   A wide grab area (14px) that looks slim until you use it: the thumb has a
+   see-through border, which shrinks on hover and while dragging, so it
+   thickens under the pointer. It never gets shorter than 48px, and the track
+   shows faintly so it's clear where to click to jump up or down. */
+#nv-chat-messages {
+  overscroll-behavior: contain; /* reaching the end doesn't scroll the page */
+}
+#nv-chat-messages::-webkit-scrollbar {
+  width: 14px;
+  background: transparent;
+}
+#nv-chat-messages::-webkit-scrollbar-corner,
+#nv-chat-messages::-webkit-scrollbar-button {
+  display: none;
+  background: transparent;
+}
+#nv-chat-messages::-webkit-scrollbar-track {
+  background: rgba(122, 31, 134, 0.14);
+  background-clip: padding-box;
+  border: 4px solid transparent;
+  border-radius: 14px;
+  margin: 14px 0;
+}
+/* Hovering the bar: a slightly deeper purple from the panel, not grey */
+#nv-chat-messages::-webkit-scrollbar-track:hover {
+  background: rgba(122, 31, 134, 0.28);
+  background-clip: padding-box;
+}
+#nv-chat-messages::-webkit-scrollbar-thumb {
+  min-height: 48px;
+  background: linear-gradient(180deg, #b01d68, #5a1c86);
+  background-clip: padding-box;
+  border: 3px solid transparent;
+  border-radius: 14px;
+}
+#nv-chat-messages::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #d02a7d, #7a1f86);
+  background-clip: padding-box;
+  border-width: 2px;
+}
+#nv-chat-messages::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(180deg, #ff5fa8, #9a2fb0);
+  background-clip: padding-box;
+  border-width: 1px;
+}
+/* Firefox (no gradient support, so flat brand colours).
+   Kept out of Chrome, where scrollbar-color would
+   override the gradient styles above. The track colour
+   must be solid: Firefox widens the bar on hover and
+   paints a see-through track over its own light grey. */
+@supports not selector(::-webkit-scrollbar) {
+  #nv-chat-messages {
+    scrollbar-width: auto;
+    scrollbar-color: #b01d68 #1d1230;
+  }
+}
+
+/* ----- Messages ----- */
+.nv-msg {
+  max-width: 95%;
+  padding: 11px 14px;
+  font-size: clamp(15px, 4.2vw, 18px);
+  font-weight: 500;
+  line-height: 1.5;
+  white-space: pre-line; /* keeps paragraph breaks, tidies spaces */
+  overflow-wrap: break-word; /* only splits a word if it can't fit at all */
+  hyphens: none;
+  text-wrap: pretty; /* avoids a lonely last word on its own line */
+  font-family: saira;
+  text-align: center;
+  border-radius: 24px 16px 24px 16px;
+  
+  color: rgb(229, 194, 224);
+ 
+  
+  
+}
+.nv-msg a {
+  color: #ff5fa8;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  overflow-wrap: anywhere; /* long links wrap instead of overflowing */
+}
+.nv-msg a:hover {
+  color: #fff;
+}
+.nv-bot {
+  align-self: center;
+
+  
+  
+}
+.nv-user {
+  align-self: center;
+  color: rgb(203, 61, 179);
+}
+.nv-typing {
+  color: rgba(255, 255, 255, 0.6);
+  font-style: italic;
+  animation: nv-pulse 1.2s ease-in-out infinite;
+}
+@keyframes nv-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.4; }
+}
+
+/* ----- Typing row ----- */
+/* ----- Message box: a bigger, glowing Novacane box with Send beside it ----- */
+.nv-composer {
+  padding: 12px 14px 2px;
+  border-top: 1px solid rgba(229, 194, 224, 0.12);
+  background: linear-gradient(180deg, rgba(122, 31, 134, 0.1), transparent);
+}
+.nv-input-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+#nv-chat-input {
+  flex: 1;
+  min-width: 0;
+  min-height: 56px;
+  max-height: 140px;
+  margin: 0;
+  padding: 12px 16px;
+  resize: none;
+  overflow-y: auto;
+  border: 1.5px solid transparent;
+  border-radius: 16px 24px 32px 4px; /* the site's angled button shape */
+  /* A gradient border: dark inside, pink-to-purple edge */
+  background:
+    linear-gradient(#170e22, #170e22) padding-box,
+    linear-gradient(120deg, rgba(176, 29, 104, 0.75), rgba(122, 31, 134, 0.75)) border-box;
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.45);
+  color: #fff;
+  font-family: saira, "Jost", Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.4;
+  text-align: left;
+  scrollbar-width: thin;
+  scrollbar-color: #b01d68 transparent;
+  transition: box-shadow 0.25s ease, background 0.25s ease;
+}
+#nv-chat-input::placeholder {
+  color: rgba(229, 194, 224, 0.45);
+  font-style: italic;
+}
+#nv-chat-input:hover {
+  background:
+    linear-gradient(#1a1027, #1a1027) padding-box,
+    linear-gradient(120deg, #d02a7d, #8a3fb0) border-box;
+}
+#nv-chat-input:focus {
+  outline: none;
+  background:
+    linear-gradient(#1c1129, #1c1129) padding-box,
+    linear-gradient(120deg, #ff5fa8, #d02a7d 45%, #8a4fd8) border-box;
+  box-shadow:
+    inset 0 2px 10px rgba(0, 0, 0, 0.4),
+    0 0 0 3px rgba(208, 42, 125, 0.16),
+    0 0 18px rgba(208, 42, 125, 0.35);
+}
+#nv-chat-send {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 56px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 4px 32px 24px 16px; /* mirrors the message box */
+  background: linear-gradient(120deg, #b01d68 0%, #9a1c72 60%, #7a1f86 100%);
+  box-shadow: 0 4px 14px rgba(176, 29, 104, 0.4);
+  color: #fff;
+  font-family: "Archivo", "Arial Black", sans-serif;
+  font-stretch: 125%;
+  font-weight: 900;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: filter 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+#nv-chat-send svg {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.2s ease;
+}
+#nv-chat-send:hover {
+  filter: brightness(1.15);
+  box-shadow: 0 0 18px rgba(208, 42, 125, 0.6);
+}
+#nv-chat-send:hover svg {
+  transform: translateX(3px);
+}
+#nv-chat-send:active {
+  transform: scale(0.96);
+}
+#nv-chat-send:disabled {
+  filter: grayscale(0.6) brightness(0.7);
+  box-shadow: none;
+  cursor: wait;
+}
+
+/* ----- Speak and Voice replies, under the message box ----- */
+.nv-tools {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 0 2px;
+}
+.nv-tools:not(:has(> :not([hidden]))) {
+  display: none; /* neither is available on this device */
+}
+.nv-tool {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border: 1px solid rgba(229, 194, 224, 0.3);
+  border-radius: 999px;
+  background: rgba(122, 31, 134, 0.16);
+  color: rgb(229, 194, 224);
+  font-family: saira, "Jost", Arial, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.nv-tool[hidden] {
+  display: none;
+}
+.nv-tool svg {
+  flex: none;
+  width: 15px;
+  height: 15px;
+}
+.nv-tool:hover {
+  color: #fff;
+  border-color: rgba(255, 95, 168, 0.65);
+}
+.nv-tool:disabled {
+  opacity: 0.45;
+  cursor: wait;
+}
+
+/* Voice replies on: filled pink, like the other active buttons */
+#nv-voice-toggle[aria-pressed="true"] {
+  background: linear-gradient(120deg, #b01d68, #7a1f86);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 0 12px rgba(208, 42, 125, 0.5);
+}
+/* Show the matching icon for on / off */
+#nv-voice-toggle[aria-pressed="true"] .nv-when-off,
+#nv-voice-toggle[aria-pressed="false"] .nv-when-on {
+  display: none;
+}
+/* A soft glow until the visitor has tried it once, so they notice it */
+#nv-voice-toggle.nv-nudge {
+  animation: nv-nudge 2.4s ease-in-out infinite;
+}
+@keyframes nv-nudge {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(208, 42, 125, 0); }
+  50%      { box-shadow: 0 0 14px 2px rgba(208, 42, 125, 0.55); }
+}
+/* Mic glows and pulses while listening */
+#nv-mic.nv-listening {
+  background: linear-gradient(120deg, #b01d68, #7a1f86);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 0 14px rgba(208, 42, 125, 0.7);
+  animation: nv-pulse 1.2s ease-in-out infinite;
+}
+
+/* ----- Under the message box: "Keep chat closed" switch + privacy note ----- */
+.nv-foot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 16px 8px;
+  text-align: center;
+}
+.nv-privacy {
+  margin: 0;
+  font-family: "Source Code Pro", monospace;
+  font-size: 11px;
+  line-height: 1.3;
+  color: rgba(229, 194, 224, 0.55);
+}
+.nv-privacy a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.nv-privacy a:hover {
+  color: #ff5fa8;
+}
+
+/* The switch, in the Novacane style: the wordmark's pink-to-purple gradient,
+   heavy slanted lettering, and the logo's sigil as the knob */
+#nv-keep-closed {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  padding: 4px 6px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  cursor: pointer;
+  color: rgb(229, 194, 224);
+}
+.nv-keep-label {
+  font-family: "Archivo", "Arial Black", sans-serif;
+  font-stretch: 125%;
+  font-weight: 900;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transform: skewX(-12deg); /* slanted, like the NOVACANE wordmark */
+  color: rgba(229, 194, 224, 0.75);
+  transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+#nv-keep-closed:hover .nv-keep-label {
+  color: #fff;
+}
+#nv-keep-closed[aria-checked="true"] .nv-keep-label {
+  background: linear-gradient(100deg, #ff5fa8 0%, #d02a7d 35%, #8a4fd8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 12px rgba(208, 42, 125, 0.35);
+}
+
+/* The track */
+.nv-switch {
+  position: relative;
+  flex: none;
+  width: 48px;
+  height: 26px;
+  border-radius: 999px;
+  border: 1px solid rgba(229, 194, 224, 0.35);
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.5);
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+#nv-keep-closed:hover .nv-switch {
+  border-color: rgba(255, 95, 168, 0.7);
+}
+#nv-keep-closed[aria-checked="true"] .nv-switch {
+  border-color: transparent;
+  background: linear-gradient(100deg, #b01d68, #d02a7d, #7a1f86, #b01d68);
+  background-size: 300% 100%;
+  box-shadow: 0 0 14px rgba(208, 42, 125, 0.65), inset 0 1px 3px rgba(0, 0, 0, 0.35);
+  animation: nv-shimmer 4s linear infinite;
+}
+@keyframes nv-shimmer {
+  from { background-position: 0% 50%; }
+  to   { background-position: 300% 50%; }
+}
+
+/* The knob: the Novacane sigil */
+.nv-knob {
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #2a1840, #150d1f 70%);
+  box-shadow: 0 0 0 1px rgba(229, 194, 224, 0.25), 0 2px 6px rgba(0, 0, 0, 0.6);
+  color: rgba(229, 194, 224, 0.8);
+  /* Slides across with a spin, overshooting slightly like a flick */
+  transition: transform 0.55s cubic-bezier(0.34, 1.4, 0.64, 1), color 0.3s ease, box-shadow 0.3s ease;
+}
+.nv-sigil {
+  width: 16px;
+  height: 16px;
+  overflow: visible;
+}
+.nv-sigil-ring {
+  transform-box: view-box;
+  transform-origin: 12px 12px;
+}
+#nv-keep-closed:hover .nv-knob {
+  color: #fff;
+}
+#nv-keep-closed[aria-checked="true"] .nv-knob {
+  transform: translateX(22px) rotate(360deg);
+  color: #fff;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.5), 0 0 12px rgba(255, 95, 168, 0.9);
+}
+/* While on: the ring slowly turns and the sigil breathes */
+#nv-keep-closed[aria-checked="true"] .nv-sigil-ring {
+  animation: nv-ring-turn 6s linear infinite;
+}
+#nv-keep-closed[aria-checked="true"] .nv-sigil {
+  animation: nv-sigil-glow 2.4s ease-in-out infinite;
+}
+@keyframes nv-ring-turn {
+  to { transform: rotate(360deg); }
+}
+@keyframes nv-sigil-glow {
+  0%, 100% { filter: drop-shadow(0 0 1px rgba(255, 95, 168, 0.6)); }
+  50%      { filter: drop-shadow(0 0 4px rgba(255, 95, 168, 1)); }
+}
+
+/* ----- Booking button ----- */
+.nv-book {
+  display: block;
+  text-align: center;
+  background: linear-gradient(120deg, #b01d68 0%, #9a1c72 60%, #7a1f86 100%);
+  color: #fff;
+  padding: 15px;
+  font-family: "Archivo", "Arial Black", sans-serif;
+  font-stretch: 125%;
+  font-weight: 900;
+  font-size: 13px;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: filter 0.15s ease;
+  border-radius: 16px 24px 32px 4px;
+}
+.nv-book:hover {
+  filter: brightness(1.18);
+}
+
+/* ----- Keyboard focus ----- */
+#nv-chat-toggle:focus-visible,
+#nv-chat-close:focus-visible,
+#nv-chat-send:focus-visible,
+.nv-tool:focus-visible,
+#nv-chat-input:focus-visible,
+.nv-teaser-open:focus-visible,
+.nv-privacy a:focus-visible,
+#nv-keep-closed:focus-visible,
+.nv-teaser-close:focus-visible,
+#nv-voice-toggle:focus-visible,
+.nv-book:focus-visible {
+  outline: 2px solid #ff5fa8;
+  outline-offset: 3px;
+}
+
+/* ----- Phones: full screen chat ----- */
+@media (max-width: 480px), (max-height: 560px) {
+  #nv-chat-panel {
+    opacity: 1; /* full screen, so nothing to see through to */
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    border: 0;
+    border-radius: 0;
+  }
+  .nv-header {
+    padding: 16px 24px 32px;
+  }
+  #nv-chat-close {
+    transform: translateX(16px);
+  }
+  #nv-chat-messages {
+    padding: 14px;
+  }
+  /* 16px stops iPhones zooming in when the box is tapped */
+  #nv-chat-input {
+    font-size: 16px;
+  }
+  .nv-book {
+    border-radius: 0;
+    padding-bottom: calc(15px + env(safe-area-inset-bottom));
+  }
+}
+
+/* ----- Less motion for people who ask for it ----- */
+@media (prefers-reduced-motion: reduce) {
+  #nv-chat-panel,
+  #nv-chat-teaser,
+  #nv-chat-toggle,
+  #nv-chat-toggle .nv-wave rect,
+  #nv-chat-toggle.nv-attention,
+  #nv-chat-toggle.nv-unread,
+  #nv-keep-closed[aria-checked="true"] .nv-switch,
+  #nv-keep-closed[aria-checked="true"] .nv-sigil,
+  #nv-keep-closed[aria-checked="true"] .nv-sigil-ring,
+  .nv-typing,
+  #nv-mic.nv-listening,
+  #nv-voice-toggle.nv-nudge {
+    animation: none;
+  }
+  #nv-chat-toggle,
+  #nv-chat-panel,
+  #nv-chat-panel.nv-tucked,
+  .nv-switch,
+  .nv-knob,
+  .nv-keep-label,
+  .nv-book {
+    transition: none;
+  }
+}
